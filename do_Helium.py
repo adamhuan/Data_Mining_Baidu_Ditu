@@ -207,7 +207,7 @@ class class_baidu_ditu:
         print("数量：" + str(obj_item_set_len))
 
         # 处理
-        item_cursor = 0
+        item_cursor = 1
         for item in obj_item_set:
 
             # 显示
@@ -219,16 +219,23 @@ class class_baidu_ditu:
                     # 标识
                     if_while = False
                 except Exception as err:
+
                     # 处理
-                    item = self.get_Element_by_JS(
-                        "return document.getElementsByClassName('search-item cater-item')[" + str(item_cursor) + "]"
+                    obj_item_set_root = self.get_Element_by_JS(
+                        "return document.getElementsByClassName('poilist')"
                     )
+                    for root_item in obj_item_set_root:
+                        item = root_item.find_element_by_xpath(
+                            "//ul[@class='poilist']/li[" + str(item_cursor) + "]")
+
+                        obj_item_set_len = len(obj_item_set)
+
                     # 标识
                     if_while = True
 
             # 变量
             obj_target_item = item.find_element_by_xpath(
-                "//li[@data-index='" + str(item.get_attribute("data-index")) + "']/div/div[3]")
+                "//li[@data-index='" + str(item.get_attribute("data-index")) + "']/div/div[last()]")
             obj_target_item_text = obj_target_item.text
 
             # 显示
@@ -292,7 +299,7 @@ if __name__ == "__main__":
     print("<爬虫程序> ---> 百度地图")
 
     # %%%%%%%%%%%%%%%%%%
-    obj_baidu_ditu = class_baidu_ditu(source_city="武汉", target_city="深圳", search_string="花店")
+    obj_baidu_ditu = class_baidu_ditu(source_city="武汉", target_city="武汉", search_string="洪山区 医院")
 
 # </editor-fold>
 
