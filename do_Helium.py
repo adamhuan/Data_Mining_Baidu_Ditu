@@ -232,7 +232,7 @@ class class_baidu_ditu:
 
                     # 标识
                     if_while = True
-
+                    
             # 变量
             obj_target_item = item.find_element_by_xpath(
                 "//li[@data-index='" + str(item.get_attribute("data-index")) + "']/div/div[last()]")
@@ -267,24 +267,33 @@ class class_baidu_ditu:
         )
         hover(obj_curPage)
 
-        obj_curPage = self.get_Element_by_JS(
-            "return document.getElementsByClassName('curPage')"
-        )
+        try:
+            obj_curPage = self.get_Element_by_JS(
+                "return document.getElementsByClassName('curPage')"
+            )
 
-        print("=============================")
-        for item in obj_curPage:
+            print("=============================")
+            for item in obj_curPage:
+
+                # 显示
+                print("当前页码：" + str(item.text))
+
+                if item.text == self.sign_prev_page_num:
+                    if_next = False
+
+                # 赋值
+                self.sign_prev_page_num = item.text
+
+            # 处理
+            click("下一页")
+
+        except Exception as err:
 
             # 显示
-            print("当前页码：" + str(item.text))
-
-            if item.text == self.sign_prev_page_num:
-                if_next = False
+            print("当前搜索没有下一页信息")
 
             # 赋值
-            self.sign_prev_page_num = item.text
-
-        # 处理
-        click("下一页")
+            if_next = False
 
         # 返回阶段
         return if_next
@@ -299,7 +308,9 @@ if __name__ == "__main__":
     print("<爬虫程序> ---> 百度地图")
 
     # %%%%%%%%%%%%%%%%%%
-    obj_baidu_ditu = class_baidu_ditu(source_city="武汉", target_city="武汉", search_string="洪山区 医院")
+    obj_baidu_ditu = class_baidu_ditu(
+        source_city="武汉", target_city="武汉", search_string="苏伊士摄影"
+    )
 
 # </editor-fold>
 
