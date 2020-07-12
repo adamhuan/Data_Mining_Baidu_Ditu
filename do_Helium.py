@@ -242,7 +242,21 @@ class class_baidu_ditu:
 
         # 处理
         item_cursor = 1
-        for item in obj_item_set:
+        for current_cursor in range(0,obj_item_set_len):
+
+            current_index = current_cursor + 1
+
+            item = None
+
+            obj_item_set_root = self.get_Element_by_JS(
+                "return document.getElementsByClassName('poilist')"
+            )
+            for root_item in obj_item_set_root:
+                item = root_item.find_element_by_xpath(
+                    "//ul[@class='poilist']/li[" + str(current_index) + "]")
+
+            # 变量
+            item_index = item.get_attribute("data-index")
 
             # 显示
             if_while = True
@@ -250,7 +264,7 @@ class class_baidu_ditu:
                 try:
                     # 处理
                     print("")
-                    print("------ " + item.tag_name + " || " + str(item.get_attribute("data-index")))
+                    print("------ " + item.tag_name + " || " + str(item_index))
                     # 标识
                     if_while = False
                 except Exception as err:
@@ -261,7 +275,7 @@ class class_baidu_ditu:
                     )
                     for root_item in obj_item_set_root:
                         item = root_item.find_element_by_xpath(
-                            "//ul[@class='poilist']/li[" + str(item_cursor) + "]")
+                            "//ul[@class='poilist']/li[" + str(item_index) + "]")
 
                         obj_item_set_len = len(obj_item_set)
 
@@ -274,16 +288,17 @@ class class_baidu_ditu:
             time.sleep(8)
 
             # 变量
-            # 总共
-            obj_target_item = item.find_element_by_xpath(
-                "//div[@class='poidetail-container']")
-            obj_target_item_text = obj_target_item.text
-
             total_message = {}
+
+            # 总共
+            obj_target_item = self.get_Element_by_JS(
+                "return document.getElementsByClassName('poidetail-container')"
+            )[0]
+            obj_target_item_text = obj_target_item.text
 
             # 标题
             try:
-                obj_title = item.find_element_by_xpath(
+                obj_title = obj_target_item.find_element_by_xpath(
                     "//div[@class='generalHead-left-header-title']")
 
                 print("标题：" + obj_title.text)
@@ -294,7 +309,7 @@ class class_baidu_ditu:
 
             # 类型
             try:
-                obj_type = item.find_element_by_xpath(
+                obj_type = obj_target_item.find_element_by_xpath(
                     "//div[@class='generalHead-left-header-aoitag animation-common']")
                 print("类型：" + obj_type.text)
                 total_message.update(type = obj_type.text)
@@ -303,9 +318,9 @@ class class_baidu_ditu:
 
             # 星级评分
             try:
-                obj_star_1 = item.find_element_by_xpath(
+                obj_star_1 = obj_target_item.find_element_by_xpath(
                     "//span[@class='left-header-visit']")
-                obj_star_2 = item.find_element_by_xpath(
+                obj_star_2 = obj_target_item.find_element_by_xpath(
                     "//span[@class='left-header-know-visit']")
 
                 obj_star = obj_star_1.text + " " + obj_star_2.text
@@ -316,7 +331,7 @@ class class_baidu_ditu:
 
             # 参考价
             try:
-                obj_price = item.find_element_by_xpath(
+                obj_price = obj_target_item.find_element_by_xpath(
                     "//span[@class='left-header-reference-price']")
                 print("参考价：" + obj_price.text)
                 total_message.update(price = obj_price.text)
@@ -325,7 +340,7 @@ class class_baidu_ditu:
 
             # 地址
             try:
-                obj_address = item.find_element_by_xpath(
+                obj_address = obj_target_item.find_element_by_xpath(
                     "//div[@class='generalInfo-address item']")
                 print("地址：" + obj_address.text)
                 total_message.update(address = obj_address.text)
@@ -334,7 +349,7 @@ class class_baidu_ditu:
 
             # 电话
             try:
-                obj_phone = item.find_element_by_xpath(
+                obj_phone = obj_target_item.find_element_by_xpath(
                     "//div[@class='generalInfo-telnum item']")
                 print("电话：" + obj_phone.text)
                 total_message.update(phone = obj_phone.text)
@@ -343,7 +358,7 @@ class class_baidu_ditu:
 
             # 营业时间
             try:
-                obj_business_time = item.find_element_by_xpath(
+                obj_business_time = obj_target_item.find_element_by_xpath(
                     "//div[@class='content c-auxiliary']")
                 print("营业时间：" + obj_business_time.text)
                 total_message.update(business_time=obj_business_time.text)
@@ -357,45 +372,21 @@ class class_baidu_ditu:
             self.obj_excel.do_write(total_message, self.total_count)
 
             # 返回
-            while_condition = True
 
-            while while_condition:
+            print("@@@@@@@@@@@@")
 
-                obj_sign = None
-                object_return = None
+            object_return_root = self.get_Element_by_JS(
+                "return document.getElementById('cards-level0')"
+                # "return document.getElementsByClassName('status-return')"
+            )
 
-                try:
-                    object_return = self.get_Element_by_JS(
-                        # "return document.getElementsByClassName('card status-return fold')"
-                        "return document.getElementsByClassName('status-return')"
-                    )
-                except Exception as err:
-                    print(err)
+            object_return = object_return_root.find_element_by_xpath(
+                "//ul/li[1]")
 
-                try:
-                    obj_sign = item.find_element_by_xpath(
-                        "//ul[@class='poilist']")
+            print(object_return.get_attribute("data-fold"))
 
-                    # 显示
-                    # print("@@@@@@@@@@")
-                    # print(obj_sign.text)
-                    # print("@@@@@@@@@@")
-                except Exception as err:
-                    pass
-
-                if obj_sign is None:
-                    print("=============")
-                    print("---> 点击返回")
-                    object_return[0].click()
-                else:
-                    if obj_sign.text == "":
-                        print("=============")
-                        print("---> 点击返回")
-                        object_return[0].click()
-                    else:
-                        while_condition = False
-
-                    while_condition = False
+            print("---> 返回")
+            click(object_return)
 
             # 自增
             item_cursor = item_cursor + 1
