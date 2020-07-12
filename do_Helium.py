@@ -293,8 +293,14 @@ class class_baidu_ditu:
             # 总共
             obj_target_item = self.get_Element_by_JS(
                 "return document.getElementsByClassName('poidetail-container')"
-            )[0]
-            obj_target_item_text = obj_target_item.text
+            )
+
+            if len(obj_target_item) != 0:
+                obj_target_item = obj_target_item[0]
+            else:
+                print("当前为零")
+
+            # obj_target_item_text = obj_target_item.text
 
             # 标题
             try:
@@ -452,7 +458,7 @@ if __name__ == "__main__":
 
     # %%%%%%%%%%%%%%%%%%
     obj_baidu_ditu = class_baidu_ditu(
-        source_city="武汉", target_city="武汉", search_string="影院"
+        source_city="武汉", target_city="杭州", search_string="影院"
     )
 
 # </editor-fold>
