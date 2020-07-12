@@ -16,7 +16,6 @@ import xlwt
 # -- 读
 import xlrd
 
-
 # </editor-fold>
 
 # ********************************************
@@ -58,9 +57,9 @@ class class_xlwr:
                 item_value = data_to_write.get(item)
 
                 # 显示
-                print("----------")
-                print("Key = " + item)
-                print("Value = " + item_value)
+                # print("----------")
+                # print("Key = " + item)
+                # print("Value = " + item_value)
 
                 if item == "title":
                     self.obj_excel_workbook_sheet.write(which_line, 0, item_value)
@@ -80,12 +79,12 @@ class class_xlwr:
         # 保存
         self.obj_excel_workbook.save(self.file_name)
 
-
 # ))))))))))))))))))) class_baidu_ditu / 探索【百度地图】
 class class_baidu_ditu:
 
     # ))))))))))))))) 初始化
     def __init__(self, source_city, target_city, search_string):
+
         # 变量 / 函数
         str_url_baidu_ditu = "ditu.baidu.com"
 
@@ -108,7 +107,7 @@ class class_baidu_ditu:
         # 定义【Sheet】
         self.obj_excel.do_sheet("搜索【" + city_target + "】的【" + self.what_you_want + "】")
         # 定义【列】
-        self.obj_excel.do_write(['名称', '类型', '星级评分', '参考价', '地址', '电话', '营业时间'], 0)
+        self.obj_excel.do_write(['名称', '类型', '星级评分', '参考价', '地址','电话','营业时间'], 0)
 
         # 定位城市
         self.identify_city(str_city_source=city_source, str_city_target=city_target)
@@ -354,16 +353,49 @@ class class_baidu_ditu:
             # 显示
             print(total_message)
 
-            # 返回
-            object_return = self.get_Element_by_JS(
-                "return document.getElementsByClassName('card status-return fold')"
-            )
-            # press(key=BACK_SPACE)
-            # click("返回“" + self.what_you_want + "”的搜索结果")
-            object_return[0].click()
-
             # 处理 / 写Excel文件
             self.obj_excel.do_write(total_message, self.total_count)
+
+            # 返回
+            while_condition = True
+
+            while while_condition:
+
+                obj_sign = None
+                object_return = None
+
+                try:
+                    object_return = self.get_Element_by_JS(
+                        # "return document.getElementsByClassName('card status-return fold')"
+                        "return document.getElementsByClassName('status-return')"
+                    )
+                except Exception as err:
+                    print(err)
+
+                try:
+                    obj_sign = item.find_element_by_xpath(
+                        "//ul[@class='poilist']")
+
+                    # 显示
+                    # print("@@@@@@@@@@")
+                    # print(obj_sign.text)
+                    # print("@@@@@@@@@@")
+                except Exception as err:
+                    pass
+
+                if obj_sign is None:
+                    print("=============")
+                    print("---> 点击返回")
+                    object_return[0].click()
+                else:
+                    if obj_sign.text == "":
+                        print("=============")
+                        print("---> 点击返回")
+                        object_return[0].click()
+                    else:
+                        while_condition = False
+
+                    while_condition = False
 
             # 自增
             item_cursor = item_cursor + 1
@@ -419,7 +451,6 @@ class class_baidu_ditu:
         # 返回阶段
         return if_next
 
-
 # </editor-fold>
 
 # ********************************************
@@ -430,7 +461,7 @@ if __name__ == "__main__":
 
     # %%%%%%%%%%%%%%%%%%
     obj_baidu_ditu = class_baidu_ditu(
-        source_city="武汉", target_city="深圳", search_string="希尔顿"
+        source_city="武汉", target_city="武汉", search_string="影院"
     )
 
 # </editor-fold>
