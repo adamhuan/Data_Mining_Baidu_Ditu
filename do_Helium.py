@@ -461,7 +461,8 @@ class class_baidu_ditu:
                 print("@ ---> " + obj_current_navg_item.text)
 
                 # 处理
-                if obj_current_navg_item.text != "下一页>":
+                if obj_current_navg_item.text != "下一页>" \
+                    and obj_current_navg_item.text != "<上一页":
                     obj_current_navg_list.append(int(obj_current_navg_item.text))
             
             print("当前【导航条】包含页码：" + str(obj_current_navg_list))
