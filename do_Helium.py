@@ -16,6 +16,7 @@ import xlwt
 # -- 读
 import xlrd
 
+
 # </editor-fold>
 
 # ********************************************
@@ -25,7 +26,6 @@ import xlrd
 class class_xlwr:
 
     def __init__(self, str_Excel_name_file):
-
         # 变量 / 类
         self.file_name = str_Excel_name_file
 
@@ -38,15 +38,48 @@ class class_xlwr:
 
     def do_write(self, data_to_write, which_line):
 
+        # 变量
+        data_to_write_type = type(data_to_write)
+
+        # 显示
+        print("目标数据类型：" + str(data_to_write_type))
+
         # Write / 处理
         column_len = len(data_to_write)
 
         # 开始写
-        for current_col in range(0, column_len):
-            self.obj_excel_workbook_sheet.write(which_line, current_col, data_to_write[current_col])
+        if data_to_write_type is list:
+            for current_col in range(0, column_len):
+                self.obj_excel_workbook_sheet.write(which_line, current_col, data_to_write[current_col])
+
+        else:
+            for item in data_to_write:
+                # 数据
+                item_value = data_to_write.get(item)
+
+                # 显示
+                print("----------")
+                print("Key = " + item)
+                print("Value = " + item_value)
+
+                if item == "title":
+                    self.obj_excel_workbook_sheet.write(which_line, 0, item_value)
+                if item == "type":
+                    self.obj_excel_workbook_sheet.write(which_line, 1, item_value)
+                if item == "stars":
+                    self.obj_excel_workbook_sheet.write(which_line, 2, item_value)
+                if item == "price":
+                    self.obj_excel_workbook_sheet.write(which_line, 3, item_value)
+                if item == "address":
+                    self.obj_excel_workbook_sheet.write(which_line, 4, item_value)
+                if item == "phone":
+                    self.obj_excel_workbook_sheet.write(which_line, 5, item_value)
+                if item == "business_time":
+                    self.obj_excel_workbook_sheet.write(which_line, 6, item_value)
 
         # 保存
         self.obj_excel_workbook.save(self.file_name)
+
 
 # ))))))))))))))))))) class_baidu_ditu / 探索【百度地图】
 class class_baidu_ditu:
@@ -68,20 +101,20 @@ class class_baidu_ditu:
 
         city_source = source_city
         city_target = target_city
-        what_you_want = search_string
+        self.what_you_want = search_string
 
         # 对象 / 类
         self.obj_excel = class_xlwr("百度地图_结果.xls")
         # 定义【Sheet】
-        self.obj_excel.do_sheet("搜索【" + city_target + "】的【" + what_you_want + "】")
+        self.obj_excel.do_sheet("搜索【" + city_target + "】的【" + self.what_you_want + "】")
         # 定义【列】
-        self.obj_excel.do_write(['商家名称', '备注信息【1】', '备注信息【2】'], 0)
+        self.obj_excel.do_write(['名称', '类型', '星级评分', '参考价', '地址', '电话', '营业时间'], 0)
 
         # 定位城市
         self.identify_city(str_city_source=city_source, str_city_target=city_target)
 
         # 搜索
-        self.do_search(str_search=what_you_want)
+        self.do_search(str_search=self.what_you_want)
 
         # 等待
         time.sleep(5)
@@ -114,7 +147,10 @@ class class_baidu_ditu:
         print("function::identify_city")
 
         # 点击：所在地
-        click(str_city_source)
+        try:
+            click(str_city_source)
+        except Exception as err:
+            click("全国")
 
         # 点击：目标地
         click(str_city_target)
@@ -158,7 +194,6 @@ class class_baidu_ditu:
         # 处理
         while_cursor = 1
         while do_next:
-
             # 显示
             print(" ==================== " + str(while_cursor) + " ==================== ")
 
@@ -215,6 +250,7 @@ class class_baidu_ditu:
             while if_while:
                 try:
                     # 处理
+                    print("")
                     print("------ " + item.tag_name + " || " + str(item.get_attribute("data-index")))
                     # 标识
                     if_while = False
@@ -232,17 +268,102 @@ class class_baidu_ditu:
 
                     # 标识
                     if_while = True
-                    
+
+            # 点击
+            click(item)
+
+            time.sleep(8)
+
             # 变量
+            # 总共
             obj_target_item = item.find_element_by_xpath(
-                "//li[@data-index='" + str(item.get_attribute("data-index")) + "']/div/div[last()]")
+                "//div[@class='poidetail-container']")
             obj_target_item_text = obj_target_item.text
 
-            # 显示
-            print(obj_target_item_text.split('\n'))
+            total_message = {}
 
-            # 处理
-            self.obj_excel.do_write(obj_target_item_text.split('\n'),self.total_count)
+            # 标题
+            try:
+                obj_title = item.find_element_by_xpath(
+                    "//div[@class='generalHead-left-header-title']")
+
+                print("标题：" + obj_title.text)
+
+                total_message.update(title = obj_title.text)
+            except Exception as err:
+                pass
+
+            # 类型
+            try:
+                obj_type = item.find_element_by_xpath(
+                    "//div[@class='generalHead-left-header-aoitag animation-common']")
+                print("类型：" + obj_type.text)
+                total_message.update(type = obj_type.text)
+            except Exception as err:
+                pass
+
+            # 星级评分
+            try:
+                obj_star_1 = item.find_element_by_xpath(
+                    "//span[@class='left-header-visit']")
+                obj_star_2 = item.find_element_by_xpath(
+                    "//span[@class='left-header-know-visit']")
+
+                obj_star = obj_star_1.text + " " + obj_star_2.text
+                print("星级评分：" + obj_star)
+                total_message.update(stars = obj_star)
+            except Exception as err:
+                print("没有找到星级评分")
+
+            # 参考价
+            try:
+                obj_price = item.find_element_by_xpath(
+                    "//span[@class='left-header-reference-price']")
+                print("参考价：" + obj_price.text)
+                total_message.update(price = obj_price.text)
+            except Exception as err:
+                print("没有找到参考价")
+
+            # 地址
+            try:
+                obj_address = item.find_element_by_xpath(
+                    "//div[@class='generalInfo-address item']")
+                print("地址：" + obj_address.text)
+                total_message.update(address = obj_address.text)
+            except Exception as err:
+                pass
+
+            # 电话
+            try:
+                obj_phone = item.find_element_by_xpath(
+                    "//div[@class='generalInfo-telnum item']")
+                print("电话：" + obj_phone.text)
+                total_message.update(phone = obj_phone.text)
+            except Exception as err:
+                pass
+
+            # 营业时间
+            try:
+                obj_business_time = item.find_element_by_xpath(
+                    "//div[@class='content c-auxiliary']")
+                print("营业时间：" + obj_business_time.text)
+                total_message.update(business_time=obj_business_time.text)
+            except Exception as err:
+                pass
+
+            # 显示
+            print(total_message)
+
+            # 返回
+            object_return = self.get_Element_by_JS(
+                "return document.getElementsByClassName('card status-return fold')"
+            )
+            # press(key=BACK_SPACE)
+            # click("返回“" + self.what_you_want + "”的搜索结果")
+            object_return[0].click()
+
+            # 处理 / 写Excel文件
+            self.obj_excel.do_write(total_message, self.total_count)
 
             # 自增
             item_cursor = item_cursor + 1
@@ -298,18 +419,18 @@ class class_baidu_ditu:
         # 返回阶段
         return if_next
 
+
 # </editor-fold>
 
 # ********************************************
 # <editor-fold desc="主函数">
 if __name__ == "__main__":
-
     # %%%%%%%%%%%%%%%%%%
     print("<爬虫程序> ---> 百度地图")
 
     # %%%%%%%%%%%%%%%%%%
     obj_baidu_ditu = class_baidu_ditu(
-        source_city="武汉", target_city="武汉", search_string="苏伊士摄影"
+        source_city="武汉", target_city="深圳", search_string="希尔顿"
     )
 
 # </editor-fold>
