@@ -219,6 +219,7 @@ class class_baidu_ditu:
         while_cursor = 1
         while do_next:
             # 显示
+            print("")
             print(" ==================== " + str(while_cursor) + " ==================== ")
 
             # 单页
@@ -429,35 +430,57 @@ class class_baidu_ditu:
     def get_data_action_navg_page(self):
 
         # 显示
-        print(" ---> function::get_data_action_navg_page")
+        print("")
+        print("")
+        print("---> function::get_data_action_navg_page")
 
         # 返回值
         # 为真 / 还有翻页
         # 为假 / 没有翻页
         if_next = True
 
-        # 变量 / 函数
-        obj_curPage = self.get_Element_by_JS(
-            "return document.getElementById('cards-level1')"
-        )
-        hover(obj_curPage)
-
         try:
-            obj_curPage = self.get_Element_by_JS(
-                "return document.getElementsByClassName('curPage')"
-            )
 
-            print("=============================")
-            for item in obj_curPage:
+            obj_curPage_navg = self.get_Element_by_JS(
+                "return document.getElementById('poi_page')"
+            )
+            hover(obj_curPage_navg)
+
+            # 测试
+            print(obj_curPage_navg.get_attribute("class"))
+
+            # 当前页的导航条长度
+            obj_current_navg = obj_curPage_navg.find_elements_by_xpath(
+                "//div[@class='poi-page']/child::p/child::span")
+
+            obj_current_navg_list = []
+
+            for obj_current_navg_item in obj_current_navg:
 
                 # 显示
-                print("当前页码：" + str(item.text))
+                print("@ ---> " + obj_current_navg_item.text)
 
-                if item.text == self.sign_prev_page_num:
-                    if_next = False
+                # 处理
+                if obj_current_navg_item.text != "下一页>":
+                    obj_current_navg_list.append(int(obj_current_navg_item.text))
+            
+            print("当前【导航条】包含页码：" + str(obj_current_navg_list))
 
-                # 赋值
-                self.sign_prev_page_num = item.text
+            # 具体的当前页码的SPAN标签
+            obj_curPage = obj_curPage_navg.find_element_by_xpath(
+                "//span[@class='curPage']")
+
+            print("")
+            print("=============================")
+            print("当前页码：【" + str(obj_curPage.text) + "】 / 之前：" + str(self.sign_prev_page_num))
+            print("=============================")
+            
+            if obj_curPage.text == self.sign_prev_page_num \
+                and int(self.sign_prev_page_num) == max(obj_current_navg_list):
+                if_next = False
+
+            # 赋值
+            self.sign_prev_page_num = obj_curPage.text
 
             # 处理
             click("下一页")
@@ -466,6 +489,11 @@ class class_baidu_ditu:
 
             # 显示
             print("当前搜索没有下一页信息")
+
+            # 错误
+            print("!!!!!!!!!!!!!!!!!!!!!!")
+            print(err)
+            print("!!!!!!!!!!!!!!!!!!!!!!")
 
             # 赋值
             if_next = False
