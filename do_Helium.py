@@ -458,7 +458,7 @@ if __name__ == "__main__":
 
     # %%%%%%%%%%%%%%%%%%
     obj_baidu_ditu = class_baidu_ditu(
-        source_city="武汉", target_city="杭州", search_string="影院"
+        source_city="武汉", target_city="杭州", search_string="八喜"
     )
 
 # </editor-fold>
