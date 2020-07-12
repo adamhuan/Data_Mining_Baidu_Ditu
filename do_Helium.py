@@ -10,6 +10,9 @@ import time
 # ---
 from helium import *
 
+# ******** 配置文件解析
+import configparser
+
 # ******** Excel
 # -- 写
 import xlwt
@@ -20,6 +23,28 @@ import xlrd
 
 # ********************************************
 # <editor-fold desc="类：定义">
+
+# ))))))))))))))))))) class_configparser / Config / 配置文件 / 读写
+class class_configparser:
+
+    def __init__(self, config_file):
+
+        # 变量
+        self.class_str_file_config = config_file
+        self.obj_config = configparser.ConfigParser(allow_no_value=False)
+        self.obj_config.read(filenames=self.class_str_file_config, encoding="utf-8")
+
+        # 显示
+        print("配置文件：【" + self.class_str_file_config + "】")
+
+    def find_value_with_section_option(self, section, option):
+
+        # 处理
+        data_return = self.obj_config.get(section=section, option=option)
+
+        # 返回阶段
+        return data_return
+
 
 # ))))))))))))))))))) class_xlwt / Excel / 写
 class class_xlwr:
@@ -457,8 +482,22 @@ if __name__ == "__main__":
     print("<爬虫程序> ---> 百度地图")
 
     # %%%%%%%%%%%%%%%%%%
+    obj_configparser = class_configparser(config_file="do_Helium.ini")
+
+    # -------------
+    config_source_city = obj_configparser.find_value_with_section_option(
+        section="search",option="source_city"
+    )
+    config_target_city = obj_configparser.find_value_with_section_option(
+        section="search",option="target_city"
+    )
+    config_search_string = obj_configparser.find_value_with_section_option(
+        section="search",option="search_string"
+    )
+
+    # %%%%%%%%%%%%%%%%%%
     obj_baidu_ditu = class_baidu_ditu(
-        source_city="武汉", target_city="杭州", search_string="八喜"
+        source_city=config_source_city, target_city=config_target_city, search_string=config_search_string
     )
 
 # </editor-fold>
