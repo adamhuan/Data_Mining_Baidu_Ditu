@@ -13,6 +13,9 @@ from helium import *
 # ******** 配置文件解析
 import configparser
 
+# ******** 正则
+import re
+
 # ******** Excel
 # -- 写
 import xlwt
@@ -270,61 +273,79 @@ class class_baidu_ditu:
         item_cursor = 1
         for current_cursor in range(0,obj_item_set_len):
 
-            current_index = current_cursor + 1
+            if_try_again = True
+            obj_target_item = None
+            while if_try_again:
 
-            item = None
+                current_index = current_cursor + 1
 
-            obj_item_set_root = self.get_Element_by_JS(
-                "return document.getElementsByClassName('poilist')"
-            )
-            for root_item in obj_item_set_root:
-                item = root_item.find_element_by_xpath(
-                    "//ul[@class='poilist']/li[" + str(current_index) + "]")
+                item = None
 
-            # 变量
-            item_index = item.get_attribute("data-index")
+                obj_item_set_root = self.get_Element_by_JS(
+                    "return document.getElementsByClassName('poilist')"
+                )
+                for root_item in obj_item_set_root:
+                    item = root_item.find_element_by_xpath(
+                        "//ul[@class='poilist']/li[" + str(current_index) + "]")
 
-            # 显示
-            if_while = True
-            while if_while:
-                try:
-                    # 处理
-                    print("")
-                    print("------ " + item.tag_name + " || " + str(item_index))
-                    # 标识
-                    if_while = False
-                except Exception as err:
+                # 变量
+                item_index = item.get_attribute("data-index")
 
-                    # 处理
-                    obj_item_set_root = self.get_Element_by_JS(
-                        "return document.getElementsByClassName('poilist')"
+                # 显示
+                if_while = True
+                while if_while:
+
+                    # 悬停目标元素
+                    obj_hover = self.get_Element_by_JS(
+                        "return document.getElementById('cards-level1')"
                     )
-                    for root_item in obj_item_set_root:
-                        item = root_item.find_element_by_xpath(
-                            "//ul[@class='poilist']/li[" + str(item_index) + "]")
+                    hover(obj_hover)
 
-                        obj_item_set_len = len(obj_item_set)
+                    try:
+                        # 处理
+                        print("")
+                        print("------ " + item.tag_name + " || " + str(item_index))
+                        # 标识
+                        if_while = False
+                    except Exception as err:
 
-                    # 标识
-                    if_while = True
+                        # 处理
+                        obj_item_set_root = self.get_Element_by_JS(
+                            "return document.getElementsByClassName('poilist')"
+                        )
+                        for root_item in obj_item_set_root:
+                            item = root_item.find_element_by_xpath(
+                                "//ul[@class='poilist']/li[" + str(item_index) + "]")
 
-            # 点击
-            click(item)
+                            obj_item_set_len = len(obj_item_set)
 
-            time.sleep(8)
+                        # 标识
+                        if_while = True
 
-            # 变量
-            total_message = {}
+                # 点击
+                click(item)
 
-            # 总共
-            obj_target_item = self.get_Element_by_JS(
-                "return document.getElementsByClassName('poidetail-container')"
-            )
+                time.sleep(8)
 
-            if len(obj_target_item) != 0:
-                obj_target_item = obj_target_item[0]
-            else:
-                print("当前为零")
+                # 变量
+                total_message = {}
+
+                # 悬停目标元素
+                obj_hover = self.get_Element_by_JS(
+                    "return document.getElementById('cards-level1')"
+                )
+                hover(obj_hover)
+
+                # 总共
+                obj_target_item = self.get_Element_by_JS(
+                    "return document.getElementsByClassName('poidetail-container')"
+                )
+
+                if len(obj_target_item) != 0:
+                    obj_target_item = obj_target_item[0]
+                    if_try_again = False
+                else:
+                    print("当前为零")
 
             # obj_target_item_text = obj_target_item.text
 
@@ -407,18 +428,30 @@ class class_baidu_ditu:
 
             print("@@@@@@@@@@@@")
 
-            object_return_root = self.get_Element_by_JS(
-                "return document.getElementById('cards-level0')"
-                # "return document.getElementsByClassName('status-return')"
-            )
+            if_return_try_again = True
+            while if_return_try_again:
 
-            object_return = object_return_root.find_element_by_xpath(
-                "//ul/li[1]")
+                time.sleep(5)
 
-            print(object_return.get_attribute("data-fold"))
+                object_return_root = self.get_Element_by_JS(
+                    "return document.getElementById('cards-level0')"
+                )
+                hover(object_return_root)
 
-            print("---> 返回")
-            click(object_return)
+                object_return = object_return_root.find_element_by_xpath(
+                    "//ul/li[1]")
+
+                print("$$$$$$$$$$$$")
+                print(object_return.get_attribute("data-fold"))
+
+                if object_return is None \
+                        or re.match("^共找到", object_return.get_attribute("data-fold")):
+
+                    print("---> 无返回")
+                    if_return_try_again = False
+                else:
+                    print("---> 返回")
+                    click(object_return)
 
             # 自增
             item_cursor = item_cursor + 1
@@ -479,7 +512,7 @@ class class_baidu_ditu:
             print("=============================")
             
             if obj_curPage.text == self.sign_prev_page_num \
-                and int(self.sign_prev_page_num) == max(obj_current_navg_list):
+                and int(obj_curPage.text) == max(obj_current_navg_list):
                 if_next = False
 
             # 赋值
